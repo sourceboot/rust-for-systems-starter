@@ -1,0 +1,9 @@
+# The fixtures are real SQLite databases. Mark them binary so git never applies
+# end-of-line conversion to them.
+#
+# Git's own heuristic would almost certainly get this right — these files are full of
+# NUL bytes. Relying on the heuristic is the bug: the learner's workspace becomes a git
+# repo they push, and on a Windows checkout with core.autocrlf=true a file guessed
+# wrong is silently corrupted. A corrupted fixture fails every test in the course with
+# no hint as to why. (CONTRACT.md, Portability trap 1.)
+* binary

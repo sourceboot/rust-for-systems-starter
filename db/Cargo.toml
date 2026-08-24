@@ -1,0 +1,18 @@
+# The learner-owned tree: a cargo workspace, so this course can grow PEERS.
+#
+# One member today. The workspace exists anyway, and deliberately (2026-08-19): the
+# alternative — making `sqlkit` itself the tree and the workspace root — gives shorter
+# paths but forces any second project to live INSIDE sqlkit/, which misrepresents a peer
+# as a child. An `xtask`, a benchmark harness, or a second artifact for a later lab arc
+# are all siblings of the reader, not parts of it.
+#
+# The precedent is next door: rust-primer began as one crate and grew `coretab`, `bare`
+# and `xtask` as its stages demanded them. Assume this course does the same, and note
+# that adding a member here moves nothing that already exists.
+#
+# Standalone on purpose — a fresh clone of your repo builds and tests with nothing but
+# Rust (`cd db && cargo test -p sqlkit`), no sboot required. This directory is yours to
+# publish.
+[workspace]
+resolver = "2"
+members = ["sqlkit"]

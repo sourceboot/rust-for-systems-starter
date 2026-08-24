@@ -1,0 +1,10 @@
+# NO DEPENDENCIES, EVER — and this empty section is the point, not an oversight.
+# Writing the byte readers, the varint, the error type and the b-tree walk yourself
+# IS the course; reaching for `rusqlite` or `byteorder` solves a different problem.
+[package]
+name = "sqlkit"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+

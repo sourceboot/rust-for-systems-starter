@@ -1,0 +1,5 @@
+# Stable, pinned. This course never leaves the host: no bare-metal target, no
+# nightly features, no assembler. That is what keeps its floor low — the whole
+# toolchain is `rustup default stable`.
+[toolchain]
+channel = "stable"
