@@ -1,4 +1,4 @@
-# rust-core fixtures — measured properties
+# rust-for-systems fixtures — measured properties
 
 **Generated, not written.** `fixtures/generate.sh` produced the files and
 `fixtures/measure.mjs` read every number below off the bytes on disk. Stage project

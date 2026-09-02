@@ -6,7 +6,7 @@
 # as a child. An `xtask`, a benchmark harness, or a second artifact for a later lab arc
 # are all siblings of the reader, not parts of it.
 #
-# The precedent is next door: rust-primer began as one crate and grew `coretab`, `bare`
+# The precedent is next door: rust-for-kernels began as one crate and grew `coretab`, `bare`
 # and `xtask` as its stages demanded them. Assume this course does the same, and note
 # that adding a member here moves nothing that already exists.
 #

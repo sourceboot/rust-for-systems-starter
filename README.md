@@ -1,6 +1,6 @@
-# rust-core-starter
+# rust-for-systems-starter
 
-The starter workspace for **Rust Core: Read a SQLite File** — a
+The starter workspace for **Rust for Systems: Read a SQLite File** — a
 [SourceBoot](https://sourceboot.com) course where you learn Rust by building one
 real thing: a reader for the SQLite file format, from the 100-byte file header to
 walking a b-tree and printing a table's rows.
@@ -13,8 +13,8 @@ deliberately **not** in here — they live on
 separate cache directory. A repo created from this template stays your code and
 nothing else, which is what makes it worth showing people.
 
-> Naming note: `rust-core-starter` and the course id `rust-core` are working names.
-> They may be renamed before launch; GitHub redirects renamed repos.
+> Renamed 2026-09-01 (was `rust-core-starter`, when the course id was `rust-core`). GitHub
+> redirects renamed repos, so a template link you already have keeps working.
 
 ## Use it
 
@@ -23,7 +23,7 @@ Two ways in; both give you the same tree.
 **With GitHub** — your reader starts life as a private repo you own:
 
 ```sh
-gh repo create my-sqlite-reader --private --template sourceboot/rust-core-starter --clone
+gh repo create my-sqlite-reader --private --template sourceboot/rust-for-systems-starter --clone
 cd my-sqlite-reader
 ```
 
@@ -37,17 +37,17 @@ sboot test 00-welcome         # fetches the lab's tests + grader, runs them, gra
 
 `sboot` recognises the repo by its `sboot.toml` and downloads each lab's tests on
 first use (`sboot where` prints where they live — outside this repo). Note: don't
-run `sboot start` inside the clone — that command creates a fresh `./rust-core/`
+run `sboot start` inside the clone — that command creates a fresh `./rust-for-systems/`
 directory and refuses to write into a non-empty one. With the template you already
 have the tree, so you don't need it.
 
 **Without GitHub:**
 
 ```sh
-sboot start rust-core
+sboot start rust-for-systems
 ```
 
-materialises this same tree into `./rust-core/`, no `gh` and no template involved —
+materialises this same tree into `./rust-for-systems/`, no `gh` and no template involved —
 make it a git repo whenever you like.
 
 ## What's in the tree
