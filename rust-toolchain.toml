@@ -1,5 +1,14 @@
-# Stable, pinned. This course never leaves the host: no bare-metal target, no
+# Stable. This course never leaves the host: no bare-metal target, no
 # nightly features, no assembler. That is what keeps its floor low — the whole
 # toolchain is `rustup default stable`.
 [toolchain]
 channel = "stable"
+# clippy is part of the grade from lab 01 on (each lab's `lint` run refuses the
+# handful of calls this course forbids — see .cargo/clippy.toml; added 2026-09-17,
+# ledger L44). rustup installs a listed component the first time cargo runs here
+# WHILE ONLINE; a component rustup cannot fetch is skipped with a warning (measured
+# 2026-09-17), so an offline or `--profile minimal` install meets the gap as a red
+# `lint_clean` row — lab 00's `welcome.clippy` probe names the one command that
+# fixes it, `rustup component add clippy`. A cargo that did not come from rustup
+# ignores this file altogether, and lab 00's `welcome.host` says so.
+components = ["clippy"]

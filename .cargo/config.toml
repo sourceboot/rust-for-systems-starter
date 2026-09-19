@@ -1,0 +1,107 @@
+# Build configuration for this course's workspace root (ported 2026-09-17 from
+# rust-for-beginners' 2026-09-06 grading wave, ledger L44 — the rfs twin of L35;
+# every 'measured' below was measured there, on the sibling course, and re-run here
+# by scripts/verify-nonvacuous.sh over tests/nonvacuous/rust-for-systems).
+#
+# It ships TWICE and both copies matter (scripts/build-workspace-template.sh
+# `maybe_copy .cargo`): once into the learner's own repo, so a fresh clone builds
+# with plain `cargo` and no `sboot` installed at all, and once into the spec's
+# engine bundle, so the grader's staging root — where `grader.build` and every
+# `[[run]]` execute — is configured identically. The learner's `cd db && cargo
+# test -p sqlkit` and the graded runs therefore compile under the SAME flags, which
+# is the point: a rule that only the grader enforces is a rule the learner meets
+# for the first time as a failing check.
+#
+# Cargo finds this by walking up from the current directory, so it applies from
+# the repo root down — `db/`, `labs/<stage>/checks/`, everything.
+
+[build]
+# ── -Funsafe_code ──────────────────────────────────────────────────────────────
+# `unsafe` is FORBIDDEN, at the compiler rather than in prose. CONTRACT.md hard rule 3
+# already forbids it in every stage, so nothing honest loses anything —
+# and it closes the shortest route around every other rule here. The disallowed
+# call list below is a lint over names; `unsafe` is how you stop using names:
+# an `extern "C"` constructor in a `#[link_section]`, a raw call to `_exit`, a
+# transmuted function pointer. Those are two lines each, and a lint cannot see
+# them. Forbidding the block is what gives the list teeth.
+# Measured: the `#[link_section]` constructor hack fails the COURSE BUILD (exit
+# 101) instead of scoring, so nothing it would have printed is ever captured —
+# here, 01-hello-and-errors/cases/link-section-ctor, which scored 13/13 before
+# this file existed.
+#
+# ── --cfg clippy ───────────────────────────────────────────────────────────────
+# `cfg(clippy)` is ON for every compile in this root, so `#[cfg(not(clippy))]`
+# compiles NOWHERE here. Without it that attribute is a two-character hole in the
+# lint gate: code the lint never sees is still code `cargo test` runs.
+#
+# ── -Cdebug-assertions=on and -Cpanic=unwind ───────────────────────────────────
+# THE PROFILE-CFG CLASS, and why there are two flags here rather than one.
+# rustflags are appended AFTER a profile's own flags, so these win over anything a
+# learner's `db/Cargo.toml` says. The hole they close is an ASYMMETRY, not a
+# behaviour: `labs/<stage>/checks/` declares its own `[workspace]`, so it compiles
+# sqlkit under the DEFAULT dev profile while the lint run compiles it under the
+# learner's — and any profile-derived `cfg` the tree can move is then a switch that
+# shows one body to clippy and runs another under the course's own tests.
+#
+#   debug-assertions  without the flag, `[profile.dev] debug-assertions = false`
+#                     flips `cfg(debug_assertions)` off for the lint compile only.
+#   panic             without the flag, `[profile.dev] panic = "abort"` flips
+#                     `cfg(panic = "unwind")` off for the lint compile only — the
+#                     same trick one keyword over, measured at FULL MARKS (16/16
+#                     on rust-for-beginners' hollow lab 01, RB-3) with the forgery wrapped in
+#                     `#[cfg(panic = "unwind")]` and an `#[cfg(not(...))]` twin for
+#                     clippy to read. Pinned 2026-09-06.
+#
+# ── -Coverflow-checks=on ───────────────────────────────────────────────────────
+# Added 2026-09-06, the same day the engine's config scan STOPPED refusing a
+# global `[profile.*]` (it was refusing honest machines, and our forced rustflags
+# already override the profile keys that matter). That permission is what makes
+# this line necessary: `[profile.dev] overflow-checks = false` in a
+# `~/.cargo/config.toml` is now legal, and without this it would reach the
+# course's own compile — turning an arithmetic overflow from a panic into a wrap
+# in the crate the graded assertions run against. No honest tree notices, because
+# `-Cdebug-assertions=on` already implies overflow checks when nothing sets them;
+# what the flag removes is a codegen switch a file outside the project can still
+# reach. `cfg(overflow_checks)` — the compile-time half — is a different thing and
+# is still not on stable (E0658).
+#
+# All three are pinned to ONE value for every compile in this root, which is the
+# whole claim: a `cfg` cannot differ between the compile that is linted and the
+# compile that is graded, and no profile anywhere can move the arithmetic.
+# Any future profile-derived cfg needs a line here. The enumeration is the
+# known weakness of this approach and it is stated rather than hidden: what would
+# remove the class outright is one compile serving both purposes, which the
+# separate `[workspace]` in the checks crate is what prevents.
+#
+# NOT a denylist that has to anticipate spellings — four flags that hold whatever
+# the tree says. AND, since 2026-09-06, whatever the MACHINE says: cargo's own
+# precedence puts a `RUSTFLAGS` environment variable and a `~/.cargo/config.toml`
+# `[target.<host>] rustflags` ahead of this key, so either could have dropped
+# `-Funsafe_code` from the compile our evidence comes out of. The engine now reads
+# THIS list and sets `CARGO_ENCODED_RUSTFLAGS` from it for every run a rubric
+# marks `course_owned = true` (the `lint` and `checks` runs), which is the top of
+# cargo's precedence — so the graded compile is this line whatever else is set.
+# The learner's own `cargo test` in `db/` still reads this file the ordinary way,
+# which is the point: one list, both compiles.
+rustflags = ["-Funsafe_code", "--cfg", "clippy", "-Cdebug-assertions=on", "-Cpanic=unwind", "-Coverflow-checks=on"]
+
+# ── AND THE SAME RULES FOR RUSTDOC ─────────────────────────────────────────────
+# `build.rustflags` reaches rustc and NOT rustdoc, so until 2026-09-06 the
+# paragraph above was true of every compile in this root except the ones rustdoc
+# performs for a doc test: measured, a ``` example carrying an `unsafe` block,
+# `std::fs::write` and `std::process::exit` compiled and RAN, under a config file
+# whose first heading says `unsafe` is forbidden at the compiler (RB-4). The
+# rust-for-beginners' graded `test` run is `--lib` and never executes doc tests; THIS
+# course's is not — labs 03, 06, 07 and 10 grade their `proofs` doc tests through it —
+# so here rustdocflags is not defence in depth, it is the closer for the doctest
+# channel. A rule that holds for one compiler and not the other is a rule whose
+# statement is wrong, and the statement is what the next author reads.
+rustdocflags = ["-Funsafe_code", "--cfg", "clippy", "-Cdebug-assertions=on", "-Cpanic=unwind", "-Coverflow-checks=on"]
+
+[env]
+# Where clippy reads its configuration — OUR file, resolved from this directory's
+# parent (`relative = true` means "relative to the directory holding `.cargo/`"),
+# so it is found before clippy's own walk-up discovery can reach a `clippy.toml`
+# a learner dropped in `db/`. Needs cargo ≥ 1.56 for `[env]`; the course floors
+# far above that (rust-toolchain.toml pins stable).
+CLIPPY_CONF_DIR = { value = ".cargo", relative = true }

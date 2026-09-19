@@ -1,0 +1,66 @@
+# The calls this course forbids, read by `cargo clippy` through CLIPPY_CONF_DIR
+# (.cargo/config.toml `[env]`) so it is OUR list, not one a learner's own
+# `clippy.toml` could displace — measured on rust-for-beginners: dropping an empty
+# `disallowed-methods = []` into the learner's tree changes nothing, and removing the
+# CLIPPY_CONF_DIR line makes this file invisible.
+#
+# WHAT IT IS FOR (ported 2026-09-17 from rust-for-beginners, ledger L44). The
+# learner's library is compiled into the course's own test
+# binary, so code inside it runs in the same process as the assertions that grade
+# it. These are the calls that would let that code end the run, replace what it
+# reads, or start something else — change the EVIDENCE rather than the answer.
+# Nothing this course teaches goes near any of them: the reader OPENS a file it is
+# handed (`std::fs::read`, allowed) and parses the bytes; it never writes one, never
+# ends the process and never starts another. The two binaries are `main`s over the
+# library and answer with an `ExitCode`, which is a return value, not a call. The
+# lint reads `--lib` only, so a binary is never in its view; lab 11's course-owned
+# test RUNS the two binaries as child processes instead and grades what they print
+# and how they exit. The lint never reads the learner's own tests either, and the
+# `test` run executes LAST — so a learner test (or a binary lab 11 runs) can rewrite
+# a file a `static` row reads before the judge reads it: ledger L51, red, every lab,
+# until the engine reads those files before the first run. Stated here rather than
+# hidden (wave 2b, 2026-09-17).
+#
+# `reason` is rendered to the learner verbatim inside clippy's own error, so each
+# one says what the rule protects in plain words — and none of them quotes a
+# check (docs/failure-guidance.md, never echo the rubric).
+#
+# NAMES ONLY, deliberately: this list cannot see an `unsafe` route around itself
+# (an `extern "C"` shim in a `#[link_section]`, a transmuted function pointer),
+# which is exactly why `.cargo/config.toml` forbids `unsafe` at the compiler.
+# The two are one gate, and the lint half is the weaker one.
+#
+# `allow-invalid = true` on the platform-specific paths: `std::os::windows::…`
+# does not resolve on a Mac and `std::os::unix::…` does not resolve on Windows,
+# and without it clippy fails on the path it cannot find rather than on the call
+# it was asked to catch.
+#
+# `std::process::Command::new` alone covers the whole Command family: it is the
+# only constructor, so `.spawn()`, `.output()`, `.status()` and `CommandExt::exec`
+# all need it first.
+
+disallowed-methods = [
+  { path = "std::process::exit", reason = "a test run must end when its tests end" },
+  # abort is NOT covered by clippy::exit and dies with SIGABRT rather than a code
+  # — the one spelling the lint-gate red team found still open (N1).
+  { path = "std::process::abort", reason = "a test run must end when its tests end" },
+  { path = "std::process::Command::new", reason = "the library starts no programs" },
+  { path = "std::fs::write", reason = "the library writes no files" },
+  { path = "std::fs::copy", reason = "the library writes no files" },
+  { path = "std::fs::rename", reason = "the library writes no files" },
+  { path = "std::fs::remove_file", reason = "the library writes no files" },
+  { path = "std::fs::remove_dir", reason = "the library writes no files" },
+  { path = "std::fs::remove_dir_all", reason = "the library writes no files" },
+  { path = "std::fs::create_dir", reason = "the library writes no files" },
+  { path = "std::fs::create_dir_all", reason = "the library writes no files" },
+  { path = "std::fs::hard_link", reason = "the library writes no files" },
+  { path = "std::fs::soft_link", reason = "the library writes no files" },
+  { path = "std::fs::DirBuilder::new", reason = "the library writes no files" },
+  { path = "std::fs::File::create", reason = "the library writes no files" },
+  { path = "std::fs::File::create_new", reason = "the library writes no files" },
+  { path = "std::fs::File::options", reason = "the library writes no files" },
+  { path = "std::fs::OpenOptions::new", reason = "the library writes no files" },
+  { path = "std::os::unix::fs::symlink", reason = "the library writes no files", allow-invalid = true },
+  { path = "std::os::windows::fs::symlink_file", reason = "the library writes no files", allow-invalid = true },
+  { path = "std::os::windows::fs::symlink_dir", reason = "the library writes no files", allow-invalid = true },
+]

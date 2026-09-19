@@ -5,6 +5,11 @@
 name = "sqlkit"
 version = "0.1.0"
 edition = "2021"
+# No build script, ever: the line below turns cargo's build.rs auto-detection off,
+# so nothing of yours runs at compile time — the course's checks compile your
+# library and nothing else. Every lab's rubric pins that line (`<mod>.manifest`,
+# added 2026-09-17).
+build = false
 
 [dependencies]
 
