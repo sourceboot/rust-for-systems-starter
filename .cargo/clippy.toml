@@ -17,9 +17,10 @@
 # test RUNS the two binaries as child processes instead and grades what they print
 # and how they exit. The lint never reads the learner's own tests either, and the
 # `test` run executes LAST — so a learner test (or a binary lab 11 runs) can rewrite
-# a file a `static` row reads before the judge reads it: ledger L51, red, every lab,
-# until the engine reads those files before the first run. Stated here rather than
-# hidden (wave 2b, 2026-09-17).
+# a file a `static` row reads after the compile that produced the evidence. The lint
+# does not have to see that: the engine records every file's hash before the first
+# run and a `static` row passes only on a file that still matches, locally and on the
+# server (ledger L51, closed 2026-09-20). Stated here rather than hidden.
 #
 # `reason` is rendered to the learner verbatim inside clippy's own error, so each
 # one says what the rule protects in plain words — and none of them quotes a
